@@ -168,8 +168,6 @@ int CountStr(FILE* file)
 
     fseek(file, 0, SEEK_SET);
 
-    assert(count_str == 3);
-
 	return count_str;
 }
 
@@ -189,10 +187,6 @@ void PutBeginingsIndexes(char* buf, int length, char** beginings_of_str)
             k++;
         }
     }
-    assert(*beginings_of_str[0] == 'a');
-    assert(*beginings_of_str[1] == 'd');
-    assert(*beginings_of_str[2] == 'b');
-    assert(*beginings_of_str[3] == '\0');
 }
 
 //----------------------------------------------------------------
