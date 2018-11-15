@@ -7,15 +7,15 @@ int OpenFileForRead(FILE** file, char* file_name);
 
 int OpenFileForWrite(FILE** file, char* file_name);
 
-int FileLength(FILE* file);
+unsigned long FileLength(FILE* file);
 
-int CountStr(FILE* file);
+unsigned long CountStr(FILE* file);
 
-int PutBeginingsIndexes(char* buf, int length, char** beginings_of_str, int amount_of_str);
+int PutBeginingsIndexes(char* buf, unsigned long length, char** beginings_of_str, unsigned long amount_of_str);
 
-int Rotater(char* buf, int length, char** beginings_of_str, int amount_of_str);
+int Rotater(char* buf, unsigned long length, char** beginings_of_str, unsigned long amount_of_str);
 
-int CreateNewBuf(char* buf, int length, char** beginings_of_str, int amount_of_str, char* bufnew);
+int CreateNewBuf(char* buf, unsigned long length, char** beginings_of_str, unsigned long amount_of_str, char* bufnew);
 
 //------------------------main--------------------------------
 
@@ -42,7 +42,7 @@ int main()
         return -1;
     }
 
-    int length = FileLength(input_file);
+    unsigned long length = FileLength(input_file);
 
     if (length == -1)
     {
@@ -55,7 +55,6 @@ int main()
 
     char* buf = (char*) calloc(length + 1, sizeof(char));
 
-
     if (buf == NULL)
     {
         printf("Cannot allocate memory for buf\n");
@@ -65,14 +64,14 @@ int main()
     printf("str 65\n");
 
     fseek(input_file, 0, SEEK_SET);
-    fread(buf, sizeof(char), length, input_file);
+    length = fread(buf, sizeof(char), length + 1, input_file);
+    printf("file real length = %lu\n", length);
     fseek(input_file, 0, SEEK_SET);
-
-    buf[length] = '\0';
 
     printf("str 73\n");
 
-    int amount_of_str = CountStr(input_file);
+    unsigned long amount_of_str = CountStr(input_file);
+    printf("number of str = %lu\n", amount_of_str);
     if (amount_of_str == -1)
     {
         printf("Incorrect file pointer\n");
@@ -107,7 +106,7 @@ int main()
 
     printf("str 108\n");
 
-    char* bufnew = (char*) calloc(length + 1, sizeof(char));
+    char* bufnew = (char*) calloc(length, sizeof(char));
 
     if (bufnew == NULL)
     {
@@ -190,40 +189,47 @@ int OpenFileForWrite(FILE** file, char* file_name)
 
 //------------------------------------------------------------------
 
-int FileLength(FILE* file) /*length without EOF*/
+unsigned long FileLength(FILE* file) /*length without EOF*/
 {
     if (file == NULL)
         return -1;
 
-    //fseek(file, 0, SEEK_SET);
-
-    int length = 1;
+    unsigned long length = 0;
 
     while (getc(file) != EOF)
       length++;
 
-    printf("length of file (expected without eof) = %d\n", length);
+  	/*fseek(file, 0, SEEK_END);
+
+    length = (ftell(file) + 1);*/
+
+    printf("length of file (expected without eof) = %lu\n", length);
     fseek(file, 0, SEEK_SET);
 
-    return length;
+    return (length + 1);
 }
 
 //------------------------------------------------------------------
 
-int CountStr(FILE* file)
+unsigned long CountStr(FILE* file)
 {
     if (file == NULL)
         return -1;
 
     fseek(file, 0, SEEK_SET);
 
-    int count_str = 0;
+    unsigned long count_str = 0;
 
     while (getc(file) != EOF)
     {
         fscanf(file, "%*[^\nEOF]");
         count_str++;
     }
+
+    fseek(file, -1, SEEK_END);
+
+    if (getc(file) == '\n')
+      count_str--;
 
     fseek(file, 0, SEEK_SET);
 
@@ -232,7 +238,7 @@ int CountStr(FILE* file)
 
 //-----------------------------------------------------------------
 
-int PutBeginingsIndexes(char* buf, int length, char** beginings_of_str, int amount_of_str) /*change \n on \0*/
+int PutBeginingsIndexes(char* buf, unsigned long length, char** beginings_of_str, unsigned long amount_of_str) /*change \n on \0*/
 {
     if (buf == NULL)
         return -1;
@@ -240,11 +246,12 @@ int PutBeginingsIndexes(char* buf, int length, char** beginings_of_str, int amou
     if (beginings_of_str == NULL)
         return -1;
 
-    int k = 1;
-
     beginings_of_str[0] = buf;
 
-    for (int i = 1; i < length && k < amount_of_str; i++)
+    unsigned long k = 1;
+    unsigned long i = 0;
+
+    for (i = 0; i < (length - 1) && k < amount_of_str; i++)
     {
         if (buf[i] == '\n')
         {
@@ -254,13 +261,17 @@ int PutBeginingsIndexes(char* buf, int length, char** beginings_of_str, int amou
         }
     }
 
+    if (buf[i] == '\n')
+      buf[i] = '\0';
+
     return 0;
 }
 
 //----------------------------------------------------------------
 
-int Rotater(char* buf, int length, char** beginings_of_str, int amount_of_str)
+int Rotater(char* buf, unsigned long length, char** beginings_of_str, unsigned long amount_of_str)
 {
+  printf("am i alive?");
     if (buf == NULL)
         return -1;
 
@@ -269,12 +280,15 @@ int Rotater(char* buf, int length, char** beginings_of_str, int amount_of_str)
 
     char* rotate = 0;
 
-    for (int j = 1; j < amount_of_str; j++)
+    for (unsigned long j = 1; j < amount_of_str; j++)
     {
-        for (int i = 1; i < amount_of_str; i++)
+        for (unsigned long i = 1; i < amount_of_str; i++)
         {
-            for (int k = 0; beginings_of_str[i] + k < &buf[length] && *(beginings_of_str[i - 1] + k) != '\0' && *(beginings_of_str[i] + k) != '\0'; k++)
+            for (unsigned long k = 0; beginings_of_str[i] + k < &buf[length] && beginings_of_str[i - 1] + k < &buf[length] && *(beginings_of_str[i - 1] + k) != '\0' && *(beginings_of_str[i] + k) != '\0'; k++)
             {
+              assert(beginings_of_str[i] != NULL);
+              assert(beginings_of_str[i - 1] != NULL);
+              printf("%c", *(beginings_of_str[i] + k));
                 if (*(beginings_of_str[i - 1] + k) < *(beginings_of_str[i] + k))
                 {
                     break;
@@ -295,7 +309,7 @@ int Rotater(char* buf, int length, char** beginings_of_str, int amount_of_str)
 
 //-----------------------------------------------------------------
 
-int CreateNewBuf(char* buf, int length, char** beginings_of_str, int amount_of_str, char* bufnew)
+int CreateNewBuf(char* buf, unsigned long length, char** beginings_of_str, unsigned long amount_of_str, char* bufnew)
 {
     if (buf == NULL)
         return -1;
@@ -306,11 +320,11 @@ int CreateNewBuf(char* buf, int length, char** beginings_of_str, int amount_of_s
     if (bufnew == NULL)
         return -1;
 
-    int j = 0;
+    unsigned long j = 0;
 
-    for (int i = 0; i < amount_of_str; i++)
+    for (unsigned long i = 0; i < amount_of_str; i++)
     {
-        for (int k = 0; beginings_of_str[i] + k < &buf[length] && *(beginings_of_str[i] + k) != '\0'; k++)
+        for (unsigned long k = 0; beginings_of_str[i] + k < &buf[length] && *(beginings_of_str[i] + k) != '\0'; k++)
         {
             bufnew[j] = *(beginings_of_str[i] + k);
             j++;
