@@ -261,14 +261,19 @@ int Comparer(unsigned long str1, unsigned long str2, char** beginings_of_str, ch
   if (beginings_of_str == NULL)
       return -1;
 
-	for (unsigned long i = 0; *(beginings_of_str[str1] + i) != '\0' && *(beginings_of_str[str2] + i) != '\0'; i++)
+  unsigned long i = 0;
+
+	for (i = 0; *(beginings_of_str[str1] + i) != '\0' && *(beginings_of_str[str2] + i) != '\0'; i++)
 	{
 		if (*(beginings_of_str[str1] + i) < *(beginings_of_str[str2] + i))
 			return 1; //str1 should be before str2
 		else if (*(beginings_of_str[str1] + i) > *(beginings_of_str[str2] + i))
 				return 2; //str1 should be after str2
 	}
-	return 0; //str1 and str2 aare same
+  if (*(beginings_of_str[str1] + i) == '\0')
+    return 1;
+  else
+    return 2;
 }
 
 //-----------------------------------------------------------------
