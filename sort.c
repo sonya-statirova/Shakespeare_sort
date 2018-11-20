@@ -31,27 +31,15 @@ int main()
     FILE* output_file = NULL;
 
     if (InitializateAndOpenFileForRead(&input_file, input_file_name) == -1)
-        {
-            printf("Cannot open input file\n");
-
             return -1;
-        }
 
     if (InitializateAndOpenFileForWrite(&output_file, output_file_name) == -1)
-        {
-            printf("Cannot open output file\n");
-
             return -1;
-        }
 
     unsigned long length = FileLength(input_file);
 
     if (length == -1)
-        {
-            printf("Incorrect file pointer\n");
-
             return -1;
-        }
 
     char* buf = (char*) calloc(length + 1, sizeof(char));
 
@@ -65,17 +53,13 @@ int main()
         }
 
     fseek(input_file, 0, SEEK_SET);
-    fread(buf, sizeof(char), length + 1, input_file);
+    fread(buf, sizeof(char), length, input_file);
     fseek(input_file, 0, SEEK_SET);
 
     unsigned long amount_of_str = CountStr(buf, length);
 
     if (amount_of_str == -1)
-        {
-            printf("Incorrect file pointer\n");
-
             return -1;
-        }
 
     char** beginings_of_str = (char**) calloc(amount_of_str, sizeof(char*));
 
@@ -90,18 +74,10 @@ int main()
         }
 
     if (PutBeginingsIndexes(buf, length, beginings_of_str, amount_of_str) == -1)
-        {
-            printf("Incorrect array pointer\n");
-
             return -1;
-        }
 
     if (DeleteR_PutO( buf, length) == -1)
-        {
-            printf("Incorrect array pointer\n");
-
             return -1;
-        }
 
     char* bufnew = (char*) calloc(length, sizeof(char));
 
@@ -117,18 +93,10 @@ int main()
         }
 
     if (Sort(amount_of_str, beginings_of_str, buf) == -1)
-        {
-            printf("Incorrect array pointer or incorrect working of function Comparer\n");
-
             return -1;
-        }
 
     if (CreateNewBuf(buf, length, beginings_of_str, amount_of_str, bufnew) == -1)
-        {
-            printf("Incorrect array pointer\n");
-
             return -1;
-        }
 
     fwrite(bufnew, sizeof(char), length, output_file);
 
@@ -138,7 +106,7 @@ int main()
     free(beginings_of_str);
     free(bufnew);
 
-    printf("Your laba is ready and put into %s\n\n", output_file_name);
+    printf("File was sorted and put into %s\n\n", output_file_name);
 
     return 0;
 }
@@ -155,7 +123,10 @@ int InitializateAndOpenFileForRead(FILE** file, char* file_name)
     *file = fopen(file_name, "r");
 
     if (*file  == NULL)
+    {
+        printf("Cannot open input file\n");
         return -1;
+    }
 
     return 0;
 }
@@ -172,7 +143,11 @@ int InitializateAndOpenFileForWrite(FILE** file, char* file_name)
     *file = fopen(file_name, "w");
 
     if (*file  == NULL)
+    {
+        printf("Cannot open output file\n");
         return -1;
+    }
+
     return 0;
 }
 
@@ -190,7 +165,7 @@ unsigned long FileLength(FILE* file) /*length without EOF*/
 
     fseek(file, 0, SEEK_SET);
 
-    return (length + 1);
+    return length;
 }
 
 //-------------------------------------------------------------------
@@ -242,7 +217,7 @@ int DeleteR_PutO(char* buf, unsigned long length)
   if (buf == NULL)
       return -1;
 
-  for (unsigned long i = 0; i < (length); i++)
+  for (unsigned long i = 0; i < length; i++)
   {
       if (buf[i] == '\n')
           buf[i] = '\0';
@@ -261,19 +236,46 @@ int Comparer(unsigned long str1, unsigned long str2, char** beginings_of_str, ch
   if (beginings_of_str == NULL)
       return -1;
 
-  unsigned long i = 0;
+  unsigned long i1 = 0;
+  unsigned long i2 = 0;
+  char letter1 = '\0';
+  char letter2 = '\0';
 
-	for (i = 0; *(beginings_of_str[str1] + i) != '\0' && *(beginings_of_str[str2] + i) != '\0'; i++)
+	while (*(beginings_of_str[str1] + i1) != '\0' && *(beginings_of_str[str2] + i2) != '\0')
 	{
-		if (*(beginings_of_str[str1] + i) < *(beginings_of_str[str2] + i))
-			return 1; //str1 should be before str2
-		else if (*(beginings_of_str[str1] + i) > *(beginings_of_str[str2] + i))
-				return 2; //str1 should be after str2
+		letter1 = *(beginings_of_str[str1] + i1);
+    letter2 = *(beginings_of_str[str2] + i2);
+
+    if (!(('a' <= letter1 && letter1 <= 'z') || ('A' <= letter1 && letter1 <= 'Z')))
+    {
+      i1++;
+      continue;
+    }
+    else if (!(('a' <= letter2 && letter2 <= 'z') || ('A' <= letter2 && letter2 <= 'Z')))
+    {
+      i2++;
+      continue;
+    }
+
+    if ('A' <= letter1 && letter1 <= 'Z')
+      letter1 = letter1 + 'a' - 'A';
+
+    if ('A' <= letter2 && letter2 <= 'Z')
+      letter2 = letter2 + 'a' - 'A';
+
+    if (letter1 < letter2)
+		  return 1; //str1 should be before str2
+		else if (letter1 > letter2)
+			return 2; //str1 should be after str2
+
+    i1++;
+    i2++;
 	}
-  if (*(beginings_of_str[str1] + i) == '\0')
-    return 1;
-  else
+
+  if (*(beginings_of_str[str2] + i2) == '\0')
     return 2;
+  else
+    return 1;
 }
 
 //-----------------------------------------------------------------
