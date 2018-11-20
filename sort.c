@@ -118,7 +118,10 @@ int InitializateAndOpenFileForRead(FILE** file, char* file_name)
     printf("Please, enter adress of file for reading in format *.txt\n");
 
     if (scanf("%s", file_name) != 1)
+    {
+      printf("error in InitializateAndOpenFileForRead\n");
       return -1;
+    }
 
     *file = fopen(file_name, "r");
 
@@ -138,7 +141,10 @@ int InitializateAndOpenFileForWrite(FILE** file, char* file_name)
     printf("Please, enter adress of file for writing in format *.txt\n");
 
     if (scanf("%s", file_name) != 1)
+    {
+      printf("error in InitializateAndOpenFileForWrite\n");
       return -1;
+    }
 
     *file = fopen(file_name, "w");
 
@@ -156,7 +162,10 @@ int InitializateAndOpenFileForWrite(FILE** file, char* file_name)
 unsigned long FileLength(FILE* file) /*length without EOF*/
 {
     if (file == NULL)
-        return -1;
+    {
+      printf("error in FileLength\n");
+      return -1;
+    }
 
     unsigned long length = 0;
 
@@ -172,6 +181,12 @@ unsigned long FileLength(FILE* file) /*length without EOF*/
 
 unsigned long CountStr(char* buf, unsigned long length)
 {
+  if (buf == NULL)
+  {
+    printf("error in CountStr\n");
+    return -1;
+  }
+
 	unsigned long count_str = 1;
 
 	for (unsigned long i = 0; i < length - 1; i++)
@@ -185,13 +200,13 @@ unsigned long CountStr(char* buf, unsigned long length)
 
 //-----------------------------------------------------------------
 
-int PutBeginingsIndexes(char* buf, unsigned long length, char** beginings_of_str, unsigned long amount_of_str) /*change \n on \0*/
+int PutBeginingsIndexes(char* buf, unsigned long length, char** beginings_of_str, unsigned long amount_of_str)
 {
-    if (buf == NULL)
-        return -1;
-
-    if (beginings_of_str == NULL)
-        return -1;
+    if (buf == NULL || beginings_of_str == NULL)
+    {
+      printf("error in PutBeginingsIndexes\n");
+      return -1;
+    }
 
     beginings_of_str[0] = buf;
 
@@ -215,7 +230,10 @@ int PutBeginingsIndexes(char* buf, unsigned long length, char** beginings_of_str
 int DeleteR_PutO(char* buf, unsigned long length)
 {
   if (buf == NULL)
-      return -1;
+  {
+    printf("error in DeleteR_PutO\n");
+    return -1;
+  }
 
   for (unsigned long i = 0; i < length; i++)
   {
@@ -230,11 +248,11 @@ int DeleteR_PutO(char* buf, unsigned long length)
 
 int Comparer(unsigned long str1, unsigned long str2, char** beginings_of_str, char* buf)
 {
-  if (buf == NULL)
-      return -1;
-
-  if (beginings_of_str == NULL)
-      return -1;
+  if (buf == NULL || beginings_of_str == NULL)
+  {
+    printf("error in Comparer\n");
+    return -1;
+  }
 
   unsigned long i1 = 0;
   unsigned long i2 = 0;
@@ -282,11 +300,11 @@ int Comparer(unsigned long str1, unsigned long str2, char** beginings_of_str, ch
 
 int Sort(unsigned long amount_of_str, char** beginings_of_str, char* buf)
 {
-  if (buf == NULL)
-      return -1;
-
-  if (beginings_of_str == NULL)
-      return -1;
+  if (buf == NULL || beginings_of_str == NULL)
+  {
+    printf("error in Sort\n");
+    return -1;
+  }
 
 	unsigned long i = 0;
 	char* k = 0;
@@ -319,14 +337,11 @@ int Sort(unsigned long amount_of_str, char** beginings_of_str, char* buf)
 
 int CreateNewBuf(char* buf, unsigned long length, char** beginings_of_str, unsigned long amount_of_str, char* bufnew)
 {
-    if (buf == NULL)
-        return -1;
-
-    if (beginings_of_str == NULL)
-        return -1;
-
-    if (bufnew == NULL)
-        return -1;
+  if (buf == NULL || beginings_of_str == NULL || bufnew == NULL)
+  {
+    printf("error in CreateNewBuf\n");
+    return -1;
+  }
 
     unsigned long j = 0;
 
